@@ -58,21 +58,23 @@
 
 	var Board = __webpack_require__(2);
 
+	SIZE = 50;
+
 	function View(rootEl) {
-	  this.board = new Board();
+	  this.board = new Board(SIZE);
 	  this.$rootEl = rootEl;
 
 	  this.setupBoard();
 	  this.registerEvents();
 	  // this.render();
-	  window.setInterval(this.step.bind(this), 500);
+	  this.intervalId = window.setInterval(this.step.bind(this), 100);
 
 	}
 
 	$.extend(View.prototype, {
 	  setupBoard: function() {
-	    for (var i = 0; i < 50; i++) {
-	      for (var j = 0; j < 50; j++) {
+	    for (var i = 0; i < SIZE; i++) {
+	      for (var j = 0; j < SIZE; j++) {
 	        var $div = $('<div>');
 	        $div.addClass('row-' + i);
 	        $div.addClass('col-' + j);
@@ -105,11 +107,19 @@
 	      var col = pos[1];
 	      $('.snake').find('.row-' + row).filter(".col-" + col).addClass('snake-segment');
 	    })
+
+	    $('div').removeClass('apple');
+	    var applePos = this.board.applePos;
+	    $('.snake').find('.row-' + applePos[0]).filter(".col-" + applePos[1]).addClass('apple');
 	  },
 
 	  step: function() {
-	    this.board.snake.move();
+	    this.board.moveSnake();
 	    this.render();
+	    if (this.board.gameOver) {
+	      window.clearInterval(this.intervalId);
+	      alert("Gameover!");
+	    }
 	  },
 
 
@@ -130,15 +140,19 @@
 	            [ 0, -1],
 	            [ 0,  1]];
 
-	function Snake() {
+	function Snake(boardSize) {
 	  this.direction = 'd'; // set default direction "up"
 	  this.segments = [];   // stores the snake
+	  this.boardSize = boardSize;
 	  this.createSnake(5);
+	  this.isGrowing = false;
+
 	}
 
 	Snake.prototype.createSnake = function(length) {
-	  var row = 25;
-	  for (var col = 25; col < length + 25; col++) {
+	  var row = Math.floor(this.boardSize / 2);
+	  var col = Math.floor(this.boardSize / 2);
+	  for ( col ; col < length + row; col++) {
 	    this.segments.unshift([row, col]);
 	  }
 	}
@@ -148,7 +162,10 @@
 	  var diff = DIFF[KEYS.indexOf(this.direction)];
 	  var newHead = [currentHead[0] + diff[0], currentHead[1] + diff[1]];
 	  this.segments.unshift(newHead);
-	  this.segments.pop();
+	  if (!this.isGrowing){
+	    this.segments.pop();
+	  }
+	  this.isGrowing = false;
 	};
 
 	Snake.prototype.turn = function(newDir) {
@@ -178,9 +195,79 @@
 	};
 
 
-	function Board() {
-	  this.snake = new Snake();     // hold a snake
+	function Board(boardSize) {
+	  this.snake = new Snake(boardSize);     // hold a snake
+	  this.applePos = null;             // stores an apple on the board
+	  this.numMoves = 0;
+	  this.boardSize = boardSize;
+	  this.gameOver = false;
+	  this.randomApple();
 	};
+
+	Board.prototype.moveSnake = function() {
+	  this.snake.move();
+	  this.numMoves += 1;
+
+	  // check game over
+	  if (this.isGameOver()) {
+	    this.gameOver = true;
+	  } else if (this.isEatingApple()){
+	    this.snake.isGrowing = true;
+	    this.randomApple();
+	  }
+	};
+
+	Board.prototype.isGameOver = function() {
+	  if (this.isHeadHittingBody() || this.isHeadHittingWall()) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+	};
+
+	Board.prototype.isHeadHittingBody = function() {
+	  var snakeHead = this.snake.segments[0];
+	  var snakeBody = this.snake.segments.slice(1);
+	  for (var i = 0; i < snakeBody.length; i++) {
+	    if (snakeHead[0] === snakeBody[i][0] && snakeHead[1] === snakeBody[i][1]) {
+	      return true;
+	    }
+	  }
+	  return false;
+	}
+
+	Board.prototype.isHeadHittingWall = function() {
+	  var snakeHead = this.snake.segments[0];
+	  if (snakeHead[0] < 0 || snakeHead[1] < 0 || snakeHead[0] >= this.boardSize || snakeHead[1] >= this.boardSize) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+	}
+
+	Board.prototype.isEatingApple = function() {
+	  var snakeHead = this.snake.segments[0];
+	  if (this.applePos[0] === snakeHead[0] && this.applePos[1] === snakeHead[1]) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+
+	};
+
+
+	Board.prototype.randomApple = function() {
+	  do {
+	    var pos = this.randomPos();
+	  } while (this.snake.segments.indexOf(pos) !== -1)
+	  this.applePos = pos;
+	};
+
+	Board.prototype.randomPos = function() {
+	  var x = Math.floor(Math.random() * this.boardSize);
+	  var y = Math.floor(Math.random() * this.boardSize);
+	  return [x, y];
+	}
 
 	module.exports = Board;
 

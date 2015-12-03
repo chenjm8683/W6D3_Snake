@@ -14,3 +14,7 @@ div {
 .snake-segment {
   background-color: black;
 }
+
+.apple {
+  background-color: red;
+}

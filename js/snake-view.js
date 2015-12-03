@@ -1,20 +1,22 @@
 var Board = require('./snake.js');
 
+SIZE = 50;
+
 function View(rootEl) {
-  this.board = new Board();
+  this.board = new Board(SIZE);
   this.$rootEl = rootEl;
 
   this.setupBoard();
   this.registerEvents();
   // this.render();
-  window.setInterval(this.step.bind(this), 500);
+  this.intervalId = window.setInterval(this.step.bind(this), 100);
 
 }
 
 $.extend(View.prototype, {
   setupBoard: function() {
-    for (var i = 0; i < 50; i++) {
-      for (var j = 0; j < 50; j++) {
+    for (var i = 0; i < SIZE; i++) {
+      for (var j = 0; j < SIZE; j++) {
         var $div = $('<div>');
         $div.addClass('row-' + i);
         $div.addClass('col-' + j);
@@ -47,11 +49,19 @@ $.extend(View.prototype, {
       var col = pos[1];
       $('.snake').find('.row-' + row).filter(".col-" + col).addClass('snake-segment');
     })
+
+    $('div').removeClass('apple');
+    var applePos = this.board.applePos;
+    $('.snake').find('.row-' + applePos[0]).filter(".col-" + applePos[1]).addClass('apple');
   },
 
   step: function() {
-    this.board.snake.move();
+    this.board.moveSnake();
     this.render();
+    if (this.board.gameOver) {
+      window.clearInterval(this.intervalId);
+      alert("Gameover!");
+    }
   },
 
 
