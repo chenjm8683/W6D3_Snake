@@ -6,4 +6,4 @@ module.exports = {
     publicPath: '/js/',
     filename: 'bundle.js'
   }
-}
+};
