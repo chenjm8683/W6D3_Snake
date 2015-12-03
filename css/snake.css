@@ -1,0 +1,16 @@
+
+.snake {
+  width: 700px;
+  margin: 0 auto;
+}
+
+div {
+  float: left;
+  height: 14px;
+  width: 14px;
+  outline: 1px solid grey;
+}
+
+.snake-segment {
+  background-color: black;
+}

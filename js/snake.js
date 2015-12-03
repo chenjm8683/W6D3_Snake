@@ -5,8 +5,16 @@ var DIFF = [[-1,  0],
             [ 0,  1]];
 
 function Snake() {
-  this.direction = 'w'; // set default direction "up"
+  this.direction = 'd'; // set default direction "up"
   this.segments = [];   // stores the snake
+  this.createSnake(5);
+}
+
+Snake.prototype.createSnake = function(length) {
+  var row = 25;
+  for (var col = 25; col < length + 25; col++) {
+    this.segments.unshift([row, col]);
+  }
 }
 
 Snake.prototype.move = function() {
@@ -24,12 +32,14 @@ Snake.prototype.turn = function(newDir) {
 };
 
 Snake.prototype.isValidDirection = function(newDir) {
-  if (this.direction === 'w' && newDir === 's' ||
-      this.direction === 'a' && newDir === 'd') {
-        return false;
-      } else {
-        return true;
-      }
+  if (DIRECTION.indexOf(newDir) === -1) {
+    return false;
+  } else if (this.direction === 'w' && newDir === 's' ||
+            this.direction === 'a' && newDir === 'd') {
+    return false;
+  } else {
+    return true;
+  }
 };
 
 function Board() {
