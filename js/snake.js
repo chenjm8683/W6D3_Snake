@@ -32,15 +32,25 @@ Snake.prototype.turn = function(newDir) {
 };
 
 Snake.prototype.isValidDirection = function(newDir) {
-  if (DIRECTION.indexOf(newDir) === -1) {
+  if (KEYS.indexOf(newDir) === -1) {
     return false;
-  } else if (this.direction === 'w' && newDir === 's' ||
-            this.direction === 'a' && newDir === 'd') {
+  } else if (this.isOppositeDirection(newDir)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+Snake.prototype.isOppositeDirection = function(newDir) {
+  var currentDiff = DIFF[KEYS.indexOf(this.direction)];
+  var newDiff = DIFF[KEYS.indexOf(newDir)];
+  if (currentDiff[0] + newDiff[0] === 0){
     return false;
   } else {
     return true;
   }
 };
+
 
 function Board() {
   this.snake = new Snake();     // hold a snake

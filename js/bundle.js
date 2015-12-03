@@ -63,7 +63,9 @@
 	  this.$rootEl = rootEl;
 
 	  this.setupBoard();
+	  this.registerEvents();
 	  // this.render();
+	  window.setInterval(this.step.bind(this), 500);
 
 	}
 
@@ -79,6 +81,22 @@
 	    }
 	  },
 
+	  registerEvents: function() {
+	    $(window).on('keydown', this.handleKeyEvent.bind(this));
+	    // this.$rootEl.keydown(this.handleKeyEvent.bind(this));
+	  },
+
+	  handleKeyEvent: function(e) {
+
+	    var code = e.keyCode;
+	    // console.log(code);
+
+	    var direction = (String.fromCharCode(code)).toLowerCase();
+	    // console.log(direction);
+
+	    this.board.snake.turn(direction);
+	  },
+
 	  render: function() {
 	    $('div').removeClass('snake-segment');
 
@@ -87,7 +105,14 @@
 	      var col = pos[1];
 	      $('.snake').find('.row-' + row).filter(".col-" + col).addClass('snake-segment');
 	    })
-	  }
+	  },
+
+	  step: function() {
+	    this.board.snake.move();
+	    this.render();
+	  },
+
+
 
 
 	})
@@ -133,15 +158,25 @@
 	};
 
 	Snake.prototype.isValidDirection = function(newDir) {
-	  if (DIRECTION.indexOf(newDir) === -1) {
+	  if (KEYS.indexOf(newDir) === -1) {
 	    return false;
-	  } else if (this.direction === 'w' && newDir === 's' ||
-	            this.direction === 'a' && newDir === 'd') {
+	  } else if (this.isOppositeDirection(newDir)) {
+	    return true;
+	  } else {
+	    return false;
+	  }
+	};
+
+	Snake.prototype.isOppositeDirection = function(newDir) {
+	  var currentDiff = DIFF[KEYS.indexOf(this.direction)];
+	  var newDiff = DIFF[KEYS.indexOf(newDir)];
+	  if (currentDiff[0] + newDiff[0] === 0){
 	    return false;
 	  } else {
 	    return true;
 	  }
 	};
+
 
 	function Board() {
 	  this.snake = new Snake();     // hold a snake

@@ -5,7 +5,9 @@ function View(rootEl) {
   this.$rootEl = rootEl;
 
   this.setupBoard();
+  this.registerEvents();
   // this.render();
+  window.setInterval(this.step.bind(this), 500);
 
 }
 
@@ -21,6 +23,22 @@ $.extend(View.prototype, {
     }
   },
 
+  registerEvents: function() {
+    $(window).on('keydown', this.handleKeyEvent.bind(this));
+    // this.$rootEl.keydown(this.handleKeyEvent.bind(this));
+  },
+
+  handleKeyEvent: function(e) {
+
+    var code = e.keyCode;
+    // console.log(code);
+
+    var direction = (String.fromCharCode(code)).toLowerCase();
+    // console.log(direction);
+
+    this.board.snake.turn(direction);
+  },
+
   render: function() {
     $('div').removeClass('snake-segment');
 
@@ -29,7 +47,14 @@ $.extend(View.prototype, {
       var col = pos[1];
       $('.snake').find('.row-' + row).filter(".col-" + col).addClass('snake-segment');
     })
-  }
+  },
+
+  step: function() {
+    this.board.snake.move();
+    this.render();
+  },
+
+
 
 
 })
